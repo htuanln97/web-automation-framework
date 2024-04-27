@@ -8,6 +8,7 @@ import org.testng.annotations.Parameters;
 import com.microsoft.playwright.Page;
 
 import core.PlaywrightFactory;
+import utils.constant.Constant;
 
 public class TestBase {
 	protected Page page;
@@ -17,7 +18,7 @@ public class TestBase {
 	@BeforeMethod
 	public void beforeMethod(@Optional("chrome") String broswerType) {
 		playwrightFactory = new PlaywrightFactory();
-		page = playwrightFactory.getPage(broswerType);
+		page = playwrightFactory.getPage(broswerType, Constant.BASE_URL);
 		page.setDefaultTimeout(60000);
 	}
 
