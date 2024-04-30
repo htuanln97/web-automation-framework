@@ -1,8 +1,6 @@
 package utils.constant;
 
 public class Constant {
-	// Base URL
-	public static final String BASE_URL = "https://www.demoblaze.com/";
 	
 	// Timeout variables
 	public static final int VERY_LONG_TIME = 180;

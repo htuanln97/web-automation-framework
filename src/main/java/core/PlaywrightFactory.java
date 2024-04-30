@@ -8,17 +8,14 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 
 public class PlaywrightFactory {
-	Playwright playwright;
-	Page page;
-	Browser browser;
-	BrowserType browserType;
-	BrowserContext browserContext;
-	LaunchOptions launchOptions;
-
+	
 	private static ThreadLocal<Playwright> threadLocalPlaywright = new ThreadLocal<>();
 	private static ThreadLocal<BrowserContext> threadLocalBrowserContext = new ThreadLocal<>();
 	private static ThreadLocal<Browser> threadLocalBrowser = new ThreadLocal<>();
+	private static ThreadLocal<BrowserType> threadLocalBrowserType = new ThreadLocal<>();
 	private static ThreadLocal<Page> threadLocalPage = new ThreadLocal<>();
+	
+	public PlaywrightFactory() {}
 
 	public static Playwright getPlaywright() {
 		return threadLocalPlaywright.get();
@@ -31,47 +28,61 @@ public class PlaywrightFactory {
 	public static Browser getBrowser() {
 		return threadLocalBrowser.get();
 	}
+	
+	public static BrowserType getBrowserType() {
+		return threadLocalBrowserType.get();
+	}
 
 	public static Page getPage() {
 		return threadLocalPage.get();
 	}
 
-	public Page getPage(String sBrowserType) {
-		playwright = Playwright.create();
+	public Page getPage(String browserName) {
+		threadLocalPlaywright.set(Playwright.create());
 		LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(2000);
-		switch (sBrowserType) {
+		switch (browserName) {
 		case "chromium":
-			browserType = playwright.chromium();
+			threadLocalBrowserType.set(getPlaywright().chromium());
 			break;
 		case "chrome":
-			browserType = playwright.chromium();
+			threadLocalBrowserType.set(getPlaywright().chromium());
 			launchOptions.setChannel("chrome");
 			break;
 		case "edge":
-			browserType = playwright.chromium();
+			threadLocalBrowserType.set(getPlaywright().chromium());
 			launchOptions.setChannel("msedge");
 			break;
 		case "firefox":
-			browserType = playwright.firefox();
+			threadLocalBrowserType.set(getPlaywright().firefox());
 			break;
 		case "webkit":
-			browserType = playwright.webkit();
+			threadLocalBrowserType.set(getPlaywright().webkit());
 			break;
 		default:
-			throw new IllegalArgumentException(String.format("Unsupported browser type as: '%s'", sBrowserType));
+			throw new IllegalArgumentException(String.format("Unsupported browser name as: '%s'", browserName));
 		}
-		browser = browserType.launch(launchOptions);
-		browserContext = browser.newContext();
-		page = browserContext.newPage();
-		return page;
+		
+		threadLocalBrowser.set(getBrowserType().launch(launchOptions));
+		threadLocalBrowserContext.set(getBrowser().newContext());
+		threadLocalPage.set(getBrowserContext().newPage());
+		
+		return getPage();
 	}
 
 	public Page getPage(String sBrowserType, String sURL) {
 		getPage(sBrowserType).navigate(sURL);
-		return page;
+		return getPage();
 	}
 
-	public void closePlaywright() {
-		playwright.close();
+	public static void closeBrowserContext() {
+		if(getPage() != null) {
+			getPage().context().browser().close();
+		}
+	}
+	
+	public static void closePlaywright() {
+		if(getPlaywright() != null){
+			getPlaywright().close();
+		}
 	}
 }
