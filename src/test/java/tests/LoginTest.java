@@ -13,7 +13,7 @@ public class LoginTest extends TestBase {
 
 	@Test
 	public void loginWithValidAccount() {
-		Account account = new Account("test123456q", "test123456q");
+		Account account = new Account(prop.getProperty("user"), prop.getProperty("password"));
 		homePage = new HomePage();
 		loginPage = homePage.clickOnNavigationBar(NavigationBar.LOG_IN.toString());
 		homePage = loginPage.logIn(account);
